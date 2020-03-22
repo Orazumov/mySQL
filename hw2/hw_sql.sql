@@ -51,3 +51,6 @@ mysql> show tables from sample;
 
 oleg@heahber:~/Рабочий стол$ mysqldump mysql help_keyword | head -n 100 > example.sql
 
+
+
+
