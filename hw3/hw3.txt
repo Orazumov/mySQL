@@ -1,0 +1,222 @@
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| example            |
+| information_schema |
+| mysql              |
+| oleg_super_sqler   |
+| performance_schema |
+| sample             |
+| shop               |
+| sys                |
+| vk                 |
++--------------------+
+9 rows in set (0,00 sec)
+
+mysql> use vk;
+Database changed
+mysql> show tables;
++---------------------+
+| Tables_in_vk        |
++---------------------+
+| communities         |
+| communities_users   |
+| friendship          |
+| friendship_statuses |
+| media               |
+| media_types         |
+| messages            |
+| profiles            |
+| users               |
++---------------------+
+9 rows in set (0,00 sec)
+
+mysql> describe users;
++------------+--------------+------+-----+-------------------+-----------------------------------------------+
+| Field      | Type         | Null | Key | Default           | Extra                                         |
++------------+--------------+------+-----+-------------------+-----------------------------------------------+
+| id         | int unsigned | NO   | PRI | NULL              | auto_increment                                |
+| first_name | varchar(100) | NO   |     | NULL              |                                               |
+| last_name  | varchar(100) | NO   |     | NULL              |                                               |
+| email      | varchar(120) | NO   | UNI | NULL              |                                               |
+| phone      | varchar(120) | NO   | UNI | NULL              |                                               |
+| created_at | datetime     | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED                             |
+| updated_at | datetime     | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
++------------+--------------+------+-----+-------------------+-----------------------------------------------+
+7 rows in set (0,00 sec)
+
+mysql> 
+
+
+
+====================================================================
+
+
+oleg@heahber:~$ mysql vk < 'fulldb25-03-2020 16-12.sql'
+oleg@heahber:~$ mysql
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 46
+Server version: 8.0.19 MySQL Community Server - GPL
+
+Copyright (c) 2000, 2020, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> 
+mysql> 
+mysql> 
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| example            |
+| information_schema |
+| mysql              |
+| oleg_super_sqler   |
+| performance_schema |
+| sample             |
+| shop               |
+| sys                |
+| vk                 |
++--------------------+
+9 rows in set (0,00 sec)
+
+mysql> use vk;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+mysql> 
+mysql> 
+mysql> 
+mysql> show tables;
++---------------------+
+| Tables_in_vk        |
++---------------------+
+| communities         |
+| communities_users   |
+| friendship          |
+| friendship_statuses |
+| media               |
+| media_types         |
+| messages            |
+| profiles            |
+| users               |
++---------------------+
+9 rows in set (0,00 sec)
+
+mysql> select * from users;
++-----+------------+---------------+-----------------------------------+----------------------+---------------------+---------------------+
+| id  | first_name | last_name     | email                             | phone                | created_at          | updated_at          |
++-----+------------+---------------+-----------------------------------+----------------------+---------------------+---------------------+
+|   1 | Herminia   | Hettinger     | amalia56@example.org              | (712)870-0639x94791  | 2016-06-10 18:03:51 | 2017-06-11 08:50:50 |
+|   2 | Narciso    | Donnelly      | ohayes@example.com                | 1-078-139-1165x14847 | 2019-11-21 02:35:56 | 2011-06-30 03:12:06 |
+|   3 | Ivy        | Wisozk        | runolfsson.berneice@example.com   | 022.857.1072         | 2012-12-27 00:09:01 | 2019-01-27 21:11:17 |
+|   4 | Anahi      | Robel         | williamson.nya@example.net        | 1-296-542-9458x21544 | 2019-01-25 10:09:56 | 2018-02-17 17:39:22 |
+|   5 | Adeline    | Hammes        | zemlak.pansy@example.org          | 1-185-762-7191x995   | 2012-12-12 22:29:42 | 2011-10-02 01:33:18 |
+|   6 | Ike        | Glover        | alexa80@example.net               | 1-734-312-2619       | 2011-09-01 02:22:27 | 2010-09-25 08:26:00 |
+|   7 | Coby       | Keebler       | kathryne.bergstrom@example.com    | (004)432-2111x81564  | 2016-10-23 21:34:41 | 2018-04-25 18:39:04 |
+|   8 | Thora      | Conn          | berneice.glover@example.org       | +66(2)3074538351     | 2013-07-21 03:20:55 | 2013-08-13 11:25:49 |
+|   9 | Braden     | Lubowitz      | esperanza.koepp@example.org       | 1-025-076-5687x9482  | 2011-06-13 08:59:40 | 2019-09-27 08:08:49 |
+|  10 | Stella     | Kling         | wilfrid.gerlach@example.com       | 726.713.2034x320     | 2012-09-30 18:14:24 | 2012-10-26 07:09:08 |
+|  11 | Elmore     | Rath          | brittany43@example.net            | +18(6)3379749834     | 2019-04-10 17:07:30 | 2014-06-22 09:54:47 |
+|  12 | Cameron    | Nolan         | shanon47@example.org              | (791)346-2918x41010  | 2014-02-24 01:00:29 | 2011-02-23 10:01:48 |
+|  13 | Holden     | Dooley        | balistreri.katlyn@example.net     | (492)878-4422x10433  | 2011-06-02 06:25:56 | 2018-04-27 18:24:58 |
+|  14 | Alejandra  | Lemke         | carroll34@example.net             | 190.779.8691x21652   | 2018-09-09 08:56:45 | 2012-05-15 22:33:58 |
+|  15 | Oleta      | Lakin         | maggie.considine@example.com      | (772)876-3351x3447   | 2018-05-15 14:48:39 | 2010-05-22 16:36:13 |
+|  16 | Sherman    | Toy           | roberta56@example.com             | 1-061-791-8017x6261  | 2013-08-24 06:34:19 | 2020-03-01 08:02:31 |
+|  17 | Arthur     | Bartoletti    | stiedemann.estell@example.net     | (437)423-5061x3595   | 2018-02-02 04:00:01 | 2015-01-16 04:52:53 |
+|  18 | Adrianna   | Kiehn         | ohodkiewicz@example.com           | 661-097-1677x801     | 2014-03-13 04:41:33 | 2017-04-02 21:31:36 |
+|  19 | Germaine   | Hodkiewicz    | antonina.keebler@example.net      | 1-287-271-4767x235   | 2017-08-23 22:27:56 | 2010-05-16 20:23:32 |
+|  20 | Montana    | Gislason      | reginald52@example.org            | 1-145-794-7369x113   | 2018-01-02 01:52:49 | 2019-08-16 15:32:17 |
+|  21 | Sarai      | Kuhic         | bechtelar.destany@example.net     | 859.145.4941         | 2018-09-28 21:14:31 | 2017-02-24 15:25:53 |
+|  22 | Melyssa    | Schmitt       | vinnie.ruecker@example.org        | 926-302-2801         | 2018-01-11 21:22:01 | 2012-04-02 08:51:51 |
+|  23 | Arnoldo    | Raynor        | baumbach.rickie@example.com       | 352.486.4224x26415   | 2015-07-01 00:15:48 | 2017-12-07 15:50:47 |
+|  24 | Percival   | Bernhard      | ohauck@example.net                | 02602307196          | 2012-08-16 08:17:11 | 2016-04-28 09:40:38 |
+|  25 | Issac      | Runolfsdottir | ottilie67@example.com             | 595.394.2784         | 2013-09-14 17:06:48 | 2018-04-11 11:17:55 |
+|  26 | Israel     | Klein         | wbartell@example.org              | 1-821-276-6510       | 2012-01-27 04:00:49 | 2015-12-13 22:43:00 |
+|  27 | Alia       | Weber         | marcelino.wyman@example.com       | (017)489-6858        | 2020-02-11 04:04:24 | 2015-05-29 13:08:26 |
+|  28 | Gabriella  | Runte         | hlueilwitz@example.org            | 832.129.4958x35984   | 2018-06-25 14:39:53 | 2016-02-08 11:02:39 |
+|  29 | Rhiannon   | O'Kon         | gorczany.eliza@example.net        | 1-992-693-6425       | 2015-01-30 19:14:53 | 2012-02-14 03:42:19 |
+|  30 | Carolyn    | Ledner        | pierre.kemmer@example.com         | 365-923-2636x68522   | 2017-10-06 20:31:58 | 2016-04-07 22:41:53 |
+|  31 | Anjali     | Shields       | aubree.hickle@example.org         | (061)939-9036        | 2010-06-12 19:29:14 | 2020-01-17 22:40:45 |
+|  32 | Estefania  | Heidenreich   | ymorissette@example.org           | (904)801-8068        | 2011-01-25 04:31:51 | 2017-05-31 03:30:44 |
+|  33 | Albin      | Wehner        | erik00@example.com                | 1-272-696-5056       | 2014-12-26 21:08:15 | 2012-10-23 12:46:55 |
+|  34 | Dallas     | Gulgowski     | koch.johnny@example.org           | +13(2)5656865547     | 2011-10-28 10:58:24 | 2013-07-21 07:24:54 |
+|  35 | Nico       | Stroman       | landen77@example.com              | 524-849-1948         | 2014-08-27 16:16:36 | 2014-04-12 14:27:09 |
+|  36 | Cleo       | Padberg       | gschneider@example.org            | 290.094.7696x67815   | 2015-05-26 11:42:19 | 2016-11-09 11:22:06 |
+|  37 | Eldred     | Wolff         | wilford.muller@example.com        | 931-782-3107x923     | 2011-06-21 02:24:01 | 2017-10-07 14:11:02 |
+|  38 | Cydney     | Tremblay      | orval98@example.com               | 068.029.1707         | 2020-02-23 20:55:33 | 2018-09-30 22:37:04 |
+|  39 | Lane       | Murray        | okuneva.paula@example.net         | 007-567-5505x4360    | 2013-11-08 08:15:26 | 2012-07-04 18:25:25 |
+|  40 | Jeanne     | Wintheiser    | desmond20@example.net             | (615)476-4097        | 2013-06-26 09:04:33 | 2014-05-04 08:30:48 |
+|  41 | Shaylee    | Rosenbaum     | adolf85@example.net               | 845-079-5202x880     | 2018-06-06 04:20:56 | 2011-08-01 09:16:22 |
+|  42 | Mabel      | Hackett       | dickinson.jacynthe@example.org    | 04533131931          | 2011-01-18 09:07:44 | 2012-02-27 17:12:14 |
+|  43 | Annamarie  | Streich       | mueller.willis@example.com        | (072)422-6306        | 2016-10-20 07:33:48 | 2020-02-10 05:32:53 |
+|  44 | Lee        | Wehner        | grayson61@example.net             | (424)491-0345x66939  | 2013-12-05 11:57:20 | 2017-05-18 19:05:56 |
+|  45 | Modesto    | Corwin        | beulah.pfannerstill@example.net   | 367.545.4615         | 2014-12-01 18:15:17 | 2013-02-27 15:33:14 |
+|  46 | Ola        | Kirlin        | dtoy@example.net                  | 1-362-830-8888x052   | 2011-10-14 03:26:27 | 2011-06-22 22:45:29 |
+|  47 | Rhianna    | Skiles        | rachael52@example.org             | 1-419-370-4155       | 2015-07-24 22:47:16 | 2017-11-23 11:05:27 |
+|  48 | Kavon      | Schumm        | reese.jerde@example.com           | 938-052-5380x9314    | 2012-09-18 05:51:33 | 2016-02-18 17:00:07 |
+|  49 | Reta       | Schamberger   | langworth.alexandro@example.org   | (684)386-7651        | 2017-09-08 02:23:39 | 2012-04-20 22:55:45 |
+|  50 | Blanche    | Hintz         | ernest.donnelly@example.com       | (054)761-9785        | 2012-12-05 06:29:04 | 2012-11-09 14:22:29 |
+|  51 | Elvis      | Feeney        | dorothea79@example.net            | (931)007-3377x31109  | 2012-11-14 14:06:16 | 2014-08-28 02:12:26 |
+|  52 | Rickey     | Towne         | xlemke@example.org                | (551)993-7925x59501  | 2020-02-15 19:02:30 | 2013-08-31 14:49:19 |
+|  53 | Florence   | Runolfsdottir | gianni.corwin@example.net         | 702.571.6821x7563    | 2013-07-19 14:52:52 | 2014-08-06 03:19:07 |
+|  54 | Mohamed    | Strosin       | buck14@example.net                | 225.114.0510x44438   | 2018-07-14 04:29:29 | 2016-07-16 16:59:24 |
+|  55 | Joan       | Hane          | treynolds@example.com             | 018.272.6158x4466    | 2018-02-23 08:05:32 | 2019-02-21 14:50:44 |
+|  56 | Naomie     | Heathcote     | kristian.jast@example.com         | (858)410-0400        | 2013-12-12 04:03:56 | 2018-10-19 08:34:23 |
+|  57 | Alize      | Ziemann       | consuelo62@example.com            | 008-726-5955         | 2019-01-24 01:39:02 | 2014-02-06 22:22:24 |
+|  58 | Amani      | Schulist      | isaiah82@example.org              | 913-909-2058         | 2013-01-21 09:59:18 | 2014-08-06 16:04:25 |
+|  59 | Willa      | Carter        | napoleon.gibson@example.net       | 00248887362          | 2013-10-17 05:08:10 | 2015-02-13 01:20:16 |
+|  60 | Alvis      | Reichert      | yheathcote@example.org            | 660-655-9689         | 2010-04-14 01:54:23 | 2018-05-29 17:27:20 |
+|  61 | Trisha     | Johns         | kovacek.florence@example.com      | 340-469-1829         | 2016-09-15 20:23:58 | 2017-07-30 22:02:44 |
+|  62 | Gilda      | Mayer         | kenya.barton@example.com          | (845)223-7875        | 2015-11-20 18:23:05 | 2011-08-17 19:19:47 |
+|  63 | Dino       | Schneider     | pweissnat@example.com             | 765-490-8005x1319    | 2018-02-14 06:33:45 | 2014-04-21 16:16:26 |
+|  64 | Freda      | Reinger       | valentine.schamberger@example.com | 1-681-466-4829x06766 | 2015-06-08 13:38:32 | 2015-05-12 22:22:30 |
+|  65 | Jonas      | Johnson       | cesar.deckow@example.org          | 1-714-886-1186x75146 | 2016-06-17 04:47:35 | 2014-01-06 11:59:47 |
+|  66 | Deangelo   | Zulauf        | jordon80@example.net              | +67(2)2707744939     | 2018-10-08 09:04:26 | 2017-05-11 09:29:58 |
+|  67 | Wilson     | Hoeger        | hollie73@example.org              | 07853855241          | 2013-06-26 01:03:33 | 2013-02-13 06:00:05 |
+|  68 | Berneice   | Kuphal        | samson.kling@example.com          | 595.773.9355         | 2013-03-17 18:33:03 | 2019-03-26 23:20:58 |
+|  69 | Twila      | Feeney        | odie03@example.org                | 1-392-351-0452x960   | 2019-08-10 00:32:29 | 2013-11-29 11:27:19 |
+|  70 | Wilhelmine | Turner        | powlowski.jarod@example.org       | 943-783-1223x9455    | 2016-01-27 09:15:53 | 2011-09-29 04:54:09 |
+|  71 | Noel       | Kuhlman       | macejkovic.imelda@example.net     | +58(6)7235660548     | 2011-11-21 04:00:07 | 2020-01-31 15:42:22 |
+|  72 | Dexter     | Daniel        | davion.franecki@example.com       | 466-159-4764x44688   | 2012-08-20 14:32:37 | 2015-09-29 21:52:44 |
+|  73 | Dock       | Barrows       | brown.nicolas@example.com         | 1-288-860-8546x797   | 2014-07-26 10:55:35 | 2019-08-05 11:19:39 |
+|  74 | Cleta      | Olson         | fernando28@example.net            | 083-035-1863         | 2017-12-16 18:04:57 | 2016-02-12 16:23:39 |
+|  75 | Prince     | Fritsch       | ara49@example.net                 | 882.599.1093x6000    | 2020-03-25 04:18:55 | 2014-10-09 08:05:20 |
+|  76 | Elvera     | Cormier       | jwest@example.com                 | 1-592-771-4642       | 2018-07-11 16:07:30 | 2016-10-17 22:05:37 |
+|  77 | Lelah      | Haag          | von.jamison@example.net           | 1-012-592-0524       | 2010-07-20 21:53:32 | 2019-02-01 09:06:00 |
+|  78 | Javonte    | Douglas       | hilda22@example.net               | +32(5)6770436538     | 2016-08-05 09:01:03 | 2014-08-13 16:52:46 |
+|  79 | Eunice     | Osinski       | kobe.koepp@example.org            | 904-208-1407         | 2010-12-09 16:23:02 | 2016-06-03 12:32:54 |
+|  80 | Aida       | Pagac         | dach.columbus@example.net         | (619)345-4917        | 2016-04-12 22:00:53 | 2012-10-02 18:21:27 |
+|  81 | Octavia    | Homenick      | daryl39@example.net               | 312-044-0391x374     | 2019-02-20 02:54:09 | 2011-03-03 22:35:24 |
+|  82 | Orie       | Jenkins       | conrad.wuckert@example.net        | 796.378.6736x0244    | 2010-06-10 01:05:37 | 2015-01-01 21:36:47 |
+|  83 | Kaylah     | Yost          | ro'keefe@example.com              | +80(2)4746494692     | 2019-07-10 04:09:31 | 2019-03-09 09:54:00 |
+|  84 | Loren      | Cummerata     | flavio27@example.org              | 1-791-963-8057x0374  | 2012-08-26 18:53:23 | 2010-06-16 19:26:31 |
+|  85 | Donavon    | Towne         | prosacco.vilma@example.net        | 511.771.2478x95220   | 2013-01-16 03:29:07 | 2012-07-11 16:19:01 |
+|  86 | Dina       | King          | sam.purdy@example.com             | 376.639.6533         | 2016-11-13 07:54:27 | 2018-09-20 15:55:26 |
+|  87 | Rupert     | Goyette       | kerluke.brendan@example.org       | 054.283.9922         | 2011-12-03 19:09:16 | 2018-04-21 04:44:36 |
+|  88 | Rosie      | Kautzer       | abdiel73@example.net              | +10(9)9350640330     | 2016-04-21 06:25:42 | 2011-05-22 12:20:26 |
+|  89 | Esperanza  | Wyman         | carli25@example.net               | 513.384.4611         | 2018-05-22 06:48:34 | 2017-07-15 22:20:16 |
+|  90 | Charlene   | Schumm        | vpredovic@example.net             | (854)977-1742x604    | 2012-01-15 04:22:43 | 2013-09-07 21:09:55 |
+|  91 | Sammie     | Shanahan      | aron.krajcik@example.net          | 290-621-7367         | 2012-09-18 03:07:46 | 2015-02-20 15:21:32 |
+|  92 | Myrtie     | Bradtke       | wrussel@example.org               | 502.905.6507         | 2016-01-11 10:20:46 | 2011-11-01 13:41:30 |
+|  93 | Lonny      | Schmeler      | magnolia94@example.net            | 749-805-1420         | 2014-07-21 16:38:00 | 2019-04-04 14:34:52 |
+|  94 | Roderick   | Runolfsson    | friesen.bernadine@example.org     | 355.297.8012x09770   | 2013-02-07 17:38:30 | 2019-11-08 05:24:42 |
+|  95 | Casimir    | Torp          | agislason@example.net             | 066.145.1936         | 2010-07-10 01:50:37 | 2015-11-13 02:27:13 |
+|  96 | Euna       | Hartmann      | abbie73@example.net               | (809)649-7405        | 2015-01-10 05:01:45 | 2012-03-02 19:42:12 |
+|  97 | Clara      | Goodwin       | reggie.block@example.org          | 263-376-9777         | 2019-12-17 09:17:21 | 2019-06-23 08:20:29 |
+|  98 | Trenton    | Corwin        | zetta52@example.org               | 763-572-4776         | 2015-09-03 15:09:50 | 2013-03-02 10:35:20 |
+|  99 | Aimee      | Smith         | gina49@example.net                | 06512038286          | 2012-03-28 10:49:47 | 2011-08-12 15:48:21 |
+| 100 | Richmond   | Schneider     | eliezer.maggio@example.org        | 1-118-999-4974       | 2011-09-06 05:46:22 | 2019-05-04 08:12:40 |
++-----+------------+---------------+-----------------------------------+----------------------+---------------------+---------------------+
+100 rows in set (0,00 sec)
+
+mysql> 
+
+
