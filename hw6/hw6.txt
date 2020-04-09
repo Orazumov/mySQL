@@ -1,0 +1,148 @@
+1. Проанализировать запросы, которые выполнялись на занятии, определить возможные корректировки 
+и/или улучшения (JOIN пока не применять). Создать таблицы лайков и постов.
+Готово, таблицы созданы. Posts заполнил случайным данными.
+
+2. Подсчитать общее количество лайков, которые получили 10 самых молодых пользователей.
+
+CREATE VIEW number_of_likes AS 
+SELECT
+  (SELECT COUNT(*) 
+    FROM likes l WHERE l.target_id = p.user_id AND target_type_id = (SELECT id FROM target_types WHERE name = 'users')
+       GROUP BY target_id 
+        ) as like_number, 
+       birthday
+        
+FROM profiles p 
+ORDER BY birthday DESC
+LIMIT 10;
+
+SELECT SUM(like_number) from number_of_likes;
+
+---------------------------------------------------
+
+SELECT SUM(like_number) FROM
+
+(SELECT
+  (SELECT COUNT(*) 
+    FROM likes l WHERE l.target_id = p.user_id AND target_type_id = (SELECT id FROM target_types WHERE name = 'users')
+       ) as like_number, 
+       birthday
+        
+FROM profiles p 
+ORDER BY birthday DESC
+LIMIT 10) AS number_of_likes
+;
+
+3. Определить кто больше поставил лайков (всего) - мужчины или женщины?
+
+SELECT gender, SUM(per_user) AS total 
+  FROM (SELECT gender, (SELECT COUNT(*) 
+    FROM likes l 
+    WHERE l.user_id = p.user_id) AS per_user 
+    FROM profiles p) AS counted_likes
+  GROUP BY gender
+  ORDER BY total DESC
+  LIMIT 1
+  ;
+
+
+--------------------------------------------------------------
+
+SELECT CASE
+
+ WHEN
+
+(
+	(SELECT SUM(per_user) AS total 
+		  FROM 
+		  
+		       (SELECT gender, 
+		       
+		           (SELECT COUNT(*) 
+		            FROM likes l 
+		            WHERE l.user_id = p.user_id) AS per_user 
+		   
+		        FROM profiles p) AS counted_likes
+		 
+		GROUP BY gender HAVING gender = 'm')
+		
+		> 
+		
+		(SELECT SUM(per_user) AS total 
+		  FROM 
+		  
+		       (SELECT gender, 
+		       
+		           (SELECT COUNT(*) 
+		            FROM likes l 
+		            WHERE l.user_id = p.user_id) AS per_user 
+		   
+		        FROM profiles p) AS counted_likes
+		 
+		GROUP BY gender HAVING gender = 'f') 
+ 
+)
+		
+ THEN 'Больше мужчин'
+
+ WHEN
+
+ (
+		(SELECT SUM(per_user) AS total 
+		  FROM 
+		  
+		       (SELECT gender, 
+		       
+		           (SELECT COUNT(*) 
+		            FROM likes l 
+		            WHERE l.user_id = p.user_id) AS per_user 
+		   
+		        FROM profiles p) AS counted_likes
+		 
+		GROUP BY gender HAVING gender = 'm')
+		
+		< 
+		
+		(SELECT SUM(per_user) AS total 
+		  FROM 
+		  
+		       (SELECT gender, 
+		       
+		           (SELECT COUNT(*) 
+		            FROM likes l 
+		            WHERE l.user_id = p.user_id) AS per_user 
+		   
+		        FROM profiles p) AS counted_likes
+		 
+		GROUP BY gender HAVING gender = 'f') 
+
+)
+		
+ THEN 'Больше женщин'
+
+ ELSE 'Одинаково!'
+
+END
+
+
+4. Найти 10 пользователей, которые проявляют наименьшую активность в использовании социальной сети.
+
+
+SELECT (SELECT CONCAT(first_name, ' ', last_name) FROM users u WHERE u.id = number_of_mp.user_id) AS user_name, 
+
+user_id, number_of_posts+number_of_messages AS activity
+
+FROM
+
+(
+
+SELECT user_id, COUNT(*) AS number_of_posts, 
+
+(SELECT COUNT(*) FROM messages m WHERE m.from_user_id = pos.user_id) AS number_of_messages
+
+FROM posts pos GROUP BY user_id
+
+) AS number_of_mp
+
+ORDER BY activity LIMIT 10
+;
