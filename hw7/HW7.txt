@@ -1,0 +1,67 @@
+1. Составьте список пользователей users, которые осуществили хотя бы один заказ orders в интернет магазине.
+
+SELECT * FROM users;
+
+id	name	`date`	birthday	room	created_at	updated_at
+11	oleg	2020-03-24 17:24:36	2020-04-04 17:27:21	2	2020-04-04 19:42:06	2020-04-04 19:42:12
+12	misha	2020-03-24 17:38:32	2019-04-04 17:27:21	2	2020-04-04 19:42:06	2020-04-04 19:42:12
+13	NULL	2020-04-04 08:18:00	2020-04-04 17:27:21	1	2020-04-04 19:42:06	2020-04-04 19:42:12
+14	andrei	2020-04-04 17:07:55	2018-04-04 17:27:21	1	2020-04-04 19:42:06	2020-04-04 19:42:12
+15	kostya	2020-04-05 18:19:34	2000-05-03 16:25:00	1	2020-04-05 18:19:34	2020-04-05 18:19:34
+16	max	2020-04-05 18:20:08	2000-06-15 10:25:00	1	2020-04-05 18:20:08	2020-04-05 18:20:08
+
+SELECT * FROM orders;
+
+id	user_id	product_id
+1	11	1
+2	11	2
+3	11	3
+4	12	1
+5	12	3
+6	12	4
+
+SELECT id, name from users u WHERE EXISTS (SELECT product_id from orders o where o.user_id = u.id);
+
+id	name
+11	oleg
+12	misha
+
+2. Выведите список товаров products и разделов catalogs, который соответствует товару.
+
+SELECT
+  p.name,
+  p.price,
+  c.name
+FROM
+  catalogs c
+JOIN
+  products p
+WHERE
+  c.id = p.catalog_id;
+
+
+price	name	name
+50.00	ruchka	Письменные принадлежности
+555.00	Python textbook	Учебники
+5555.00	Pjlesos	Бытовая техника
+
+
+3. (по желанию) Пусть имеется таблица рейсов flights (id, from, to) и таблица городов cities (label, name). 
+Поля from, to и label содержат английские названия городов, поле name — русское. Выведите список рейсов flights с 
+русскими названиями городов.
+
+SELECT 
+id,
+(SELECT name from cities c WHERE f.from_ = c.label) as from_,
+(SELECT name from cities c WHERE f.to_ = c.label) as to_
+
+FROM 
+flights f
+;
+
+id	from_	to_
+1	Москва	Омск
+2	Новгород	Казань
+3	Иркутск	Москва
+4	Омск	Иркутск
+5	Москва	Казань

@@ -182,6 +182,14 @@ SELECT * FROM profiles;
 
 
 
+
+
+
+
+
+
+
+
 SELECT gender, SUM(SELECT COUNT(*) 
     FROM likes l 
     
@@ -213,6 +221,91 @@ SELECT IF(
 SELECT gender FROM profiles p ;
 
 SELECT 3+5;
+
+
+USE shop;
+
+SELECT * FROM users;
+
+SELECT * FROM orders;
+
+
+
+SELECT id, name from users u WHERE EXISTS (SELECT product_id from orders o where o.user_id = u.id);
+
+
+
+SELECT
+  p.name,
+  p.price,
+  c.name
+FROM
+  catalogs c
+JOIN
+  products p
+WHERE
+  c.id = p.catalog_id;
+
+
+SELECT * FROM products p ;
+SELECT * FROM catalogs c ;
+
+2	ruchka	{"info": "good pen!"}	50.00	25
+3	karandash	{"info": "good pencil"}	55.00	26
+4	Python textbook	{"info": "good book"}	555.00	260
+1	Pjlesos	{"info": "good pjlesos"}	5555.00	555
+
+ INSERT INTO catalogs (id, name) VALUES
+
+(25, 'Письменные принадлежности'),
+(260, 'Учебники'),
+(555, 'Бытовая техника');
+
+SELECT user_id, product_id from orders;
+
+
+
+-- (по желанию) Пусть имеется таблица рейсов flights (id, from, to) и таблица городов cities (label, name). Поля 
+-- from, to и label содержат английские названия городов, поле name — русское. Выведите список рейсов flights с русскими названиями городов.
+
+
+SELECT id, 
+
+() 
+
+FROM flights;
+
+
+
+SELECT * FROM cities;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+SELECT 
+  (SELECT CONCAT(first_name, ' ', last_name) 
+    FROM users u WHERE u.id = m.user_id) AS owner,
+  file_path, 
+  size 
+    FROM media m
+    ORDER BY size DESC
+    LIMIT 10;
+  
+
+
+
+
+
 
 
 
