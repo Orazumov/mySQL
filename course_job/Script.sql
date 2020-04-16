@@ -26,7 +26,7 @@ CREATE TABLE stations_base (
   -- ride_time INT UNSIGNED NOT NULL
   );
  
- DROP TABLE tr_stations_base;
+ -- DROP TABLE tr_stations_base;
 
  select * FROM tr_stations_base;
  
@@ -49,49 +49,58 @@ CREATE TABLE tr_stations_line (
  CREATE TABLE tr_stations_line_stations_base (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,  
   stations_line_id INT UNSIGNED NOT NULL,
-  station_id INT UNSIGNED NOT NULL
+  station_id INT UNSIGNED NOT NULL,
+  station_number INT UNSIGNED
   );
  
  
-  INSERT INTO tr_stations_line_stations_base (stations_line_id, station_id) VALUES
-(1, 1),
-(1, 2),
-(1, 3),
-(1, 4),
-(1, 5),
-(1, 6),
-(1, 7),
-(1, 8),
-(1, 9),
-(1, 10),
-(1, 11),
-(1, 12),
-(1, 13),
-(1, 14),
-(1, 15),
-(1, 16),
-(1, 17),
-(1, 18),
-(1, 19),
-(1, 20),
-(1, 21),
-(1, 22),
-(1, 23),
-(1, 24),
-(1, 25),
-(1, 26),
-(1, 27),
-(1, 28);
+ ALTER TABLE tr_stations_line_stations_base ADD COLUMN station_number INT UNSIGNED;
+
+ SELECT * FROM tr_stations_line_stations_base;
+
+UPDATE tr_stations_line_stations_base SET station_number = station_id;
+
+  INSERT INTO tr_stations_line_stations_base (stations_line_id, station_id, station_number) VALUES
+(1, 1, 1),
+(1, 2, 2),
+(1, 3, 3),
+(1, 4, 4),
+(1, 5, 5),
+(1, 6, 6),
+(1, 7, 7),
+(1, 8, 8),
+(1, 9, 9),
+(1, 10, 10),
+(1, 11, 11),
+(1, 12, 12),
+(1, 13, 13),
+(1, 14, 14),
+(1, 15, 15),
+(1, 16, 16),
+(1, 17, 17),
+(1, 18, 18),
+(1, 19, 19),
+(1, 20, 20),
+(1, 21, 21),
+(1, 22, 22),
+(1, 23, 23),
+(1, 24, 24),
+(1, 25, 25),
+(1, 26, 26),
+(1, 27, 27),
+(1, 28, 28);
+
+
 
  
  ALTER TABLE tr_stations_line MODIFY COLUMN station_id INT UNSIGNED NOT NULL;
 
  
-  select * FROM tr_stations_line;
+  select * FROM train_time;
 
  show tables;
  
-  DESCRIBE stations_base;
+  DESCRIBE train_time;
  
  TRUNCATE TABLE tr_stations_base;
  
@@ -764,7 +773,7 @@ SELECT * FROM tr_platform_way;
 ('Russia'),
 ('Turkey');
  
-DROP TABLE city;
+DROP TABLE hotel_room_type ;
 
   ALTER TABLE city RENAME TO hotel_city;
 

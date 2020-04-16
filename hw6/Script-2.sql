@@ -269,17 +269,23 @@ SELECT user_id, product_id from orders;
 -- from, to и label содержат английские названия городов, поле name — русское. Выведите список рейсов flights с русскими названиями городов.
 
 
-SELECT id, 
+SELECT 
+id,
+(SELECT name from cities c WHERE f.from_ = c.label) as from_,
+(SELECT name from cities c WHERE f.to_ = c.label) as to_
 
-() 
-
-FROM flights;
-
-
+FROM 
+flights f
+;
 
 SELECT * FROM cities;
 
-
+SELECT * FROM flights;
+1	Москва	Омск
+2	Новгород	Казань
+3	Иркутск	Москва
+4	Омск	Иркутск
+5	Москва	Казань
 
 
 
@@ -416,7 +422,7 @@ SELECT
     FROM profiles
     ORDER BY birthday DESC limit 10;
 
-   
+ --  Подсчитать общее количество лайков, которые получили 10 самых молодых пользователей.
    
 SELECT SUM(like_number) FROM
 
@@ -430,6 +436,287 @@ SELECT SUM(like_number) FROM
 	ORDER BY birthday DESC
 	LIMIT 10) AS number_of_likes
 ;
+
+-- переписать с помощью JOIN:
+
+SELECT * from profiles WHERE user_id = 99;
+SELECT * from likes WHERE target_id = 15;
+
+
+
+SELECT SUM(likes_number) FROM (
+SELECT p.user_id, p.birthday, COUNT(l.target_id) as likes_number 
+FROM profiles p 
+	 JOIN likes l 
+	 ON p.user_id = l.target_id AND l.target_type_id = 2
+
+GROUP BY l.target_id
+ORDER BY p.birthday DESC
+LIMIT 10
+) as number_of_likes 
+;
+
+
+SHOW tables;
+
+SELECT * from target_types tt ;
+
+
+
+
+SELECT SUM(likes_number) FROM (
+SELECT p.birthday, COUNT(l.target_id) as likes_number, l.target_type_id 
+FROM likes l
+	 LEFT JOIN profiles p 
+	 ON p.user_id = l.target_id AND l.target_type_id = 2
+
+GROUP BY l.target_id
+
+ORDER BY p.birthday DESC
+LIMIT 10
+) as number_of_likes 
+;
+
+--  
+
+SELECT *
+FROM likes l
+	 JOIN profiles p 
+	 ON p.user_id = l.target_id AND l.target_type_id = 2
+
+
+ORDER BY p.birthday DESC
+LIMIT 10
+;
+-- 
+
+SELECT SUM(likes_number) FROM (
+SELECT  l.target_id 
+FROM likes l
+	 LEFT JOIN profiles p 
+	 ON p.user_id = l.target_id AND l.target_type_id = 2
+
+ GROUP BY l.target_id
+
+ORDER BY p.birthday DESC
+LIMIT 10
+) as number_of_likes 
+;
+
+--
+
+SELECT  l.target_id
+FROM profiles p 
+   LEFT JOIN likes l
+   ON p.user_id = l.target_id AND l.target_type_id = 2
+
+   GROUP BY p.user_id
+
+ORDER BY p.birthday DESC
+LIMIT 10
+;
+
+--
+
+sql_mode=only_full_group_by
+
+
+
+
+SELECT SUM(likes_number) FROM (
+
+SELECT  COUNT(l.target_id) as likes_number
+FROM profiles p 
+	 LEFT JOIN likes l
+	 ON p.user_id = l.target_id AND l.target_type_id = 2
+
+  GROUP BY p.user_id
+
+ORDER BY p.birthday DESC
+LIMIT 10
+) as number_of_likes 
+;
+
+
+
+-- -------------------------------
+
+SELECT users.id, first_name, last_name, COUNT(requested_at) AS total_friends
+  FROM users
+    LEFT JOIN friendship
+      ON users.id = friendship.user_id
+        OR users.id = friendship.friend_id
+  GROUP BY users.id
+  ORDER BY total_friends DESC
+  LIMIT 10;
+
+
+-- через JOIN:
+
+99	2017-09-05	1
+78	2016-05-11	1
+12	2016-03-10	1
+59	2014-03-19	1
+95	2014-01-30	1
+30	2013-04-18	1
+14	2011-08-04	1
+36	2010-10-19	1
+11	2009-04-06	1
+32	2007-10-07	1
+
+-- через вложенный запрос:
+
+99	1	2017-09-05
+15	0	2017-06-26
+78	1	2016-05-11
+12	1	2016-03-10
+8	0	2015-04-01
+64	0	2015-01-18
+56	0	2014-07-28
+59	1	2014-03-19
+95	1	2014-01-30
+51	0	2013-10-19
+
+SELECT * from likes WHERE target_id = 78;
+
+
+
+SELECT SUM(like_number) FROM
+
+	(SELECT p.user_id, 
+	    (SELECT COUNT(*) 
+	    FROM likes l WHERE l.target_id = p.user_id AND target_type_id = (SELECT id FROM target_types WHERE name = 'users')
+	    ) as like_number, 
+	    birthday
+	        
+	FROM profiles p 
+	ORDER BY birthday DESC
+	LIMIT 10) AS number_of_likes
+;
+
+
+
+-- Кто больше поставил лайков: мужчины или женщины?
+
+   SELECT
+	 (SELECT gender FROM profiles WHERE user_id = likes.user_id) AS gender,
+	 COUNT(*) AS total
+   FROM likes
+   GROUP BY gender
+   ORDER BY total DESC
+   LIMIT 2;  
+
+-- переписать через JOIN:
+
+   SELECT p.gender, COUNT(*) as total 
+   FROM likes l
+   JOIN profiles p
+   	 ON p.user_id = l.user_id
+   GROUP BY gender
+   ORDER BY total DESC
+   LIMIT 2;  
+
+ -- Найти 10 пользователей, которые проявляют наименьшую активность в использовании социальной сети.
+
+SELECT 
+  CONCAT(first_name, ' ', last_name) AS user, 
+	(SELECT COUNT(*) FROM likes WHERE likes.user_id = users.id) + 
+	(SELECT COUNT(*) FROM media WHERE media.user_id = users.id) + 
+	(SELECT COUNT(*) FROM messages WHERE messages.from_user_id = users.id) AS overall_activity 
+	  FROM users
+	  ORDER BY overall_activity
+	  LIMIT 10;
+	 
+-- Blanche Hintz	0
+-- Roderick Runolfsson	0
+-- Freda Reinger	0
+-- Lelah Haag	0
+-- Rhiannon O'Kon	0
+-- Lonny Schmeler	0
+-- Gilda Mayer	0
+-- Ike Glover	1
+-- Dino Schneider	1
+-- Sherman Toy	1
+	 
+	 
+	 
+	 
+-- перепишем через JOIN:
+
+
+	 
+SELECT   
+  CONCAT(first_name, ' ', last_name) AS user, (COUNT(DISTINCT l.user_id) + COUNT(DISTINCT med.user_id) + COUNT(DISTINCT mes.from_user_id)) as activity 
+	  FROM users u
+	  LEFT JOIN likes l
+	  	ON l.user_id = u.id
+	  LEFT JOIN media med
+	    ON med.user_id = u.id
+	  LEFT JOIN messages mes
+	    ON mes.from_user_id = u.id
+	  GROUP BY u.id 
+	  ORDER BY activity
+	  LIMIT 10;
+	  
+	  
+	 --  
+	 
+	  SELECT * from likes ;
+
+	  SELECT * from media ;
+
+	 
+	 
+   
+   
+	 
+	 
+	 
+	 
+	 
+	 -- 
+	 
+
+SELECT 
+  CONCAT(first_name, ' ', last_name) AS user, 
+	(SELECT COUNT(likes.user_id) FROM likes WHERE likes.user_id = users.id) + 
+	(SELECT COUNT(media.user_id) FROM media WHERE media.user_id = users.id) + 
+	(SELECT COUNT(messages.from_user_id) FROM messages WHERE messages.from_user_id = users.id) AS overall_activity 
+	  FROM users
+	  ORDER BY overall_activity
+	  LIMIT 10;
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+   --
+   
+   
+   
+SELECT users.name, COUNT(orders.user_id) AS total_orders
+  FROM users
+    JOIN orders
+  ON users.id = orders.user_id
+  GROUP BY orders.user_id
+  ORDER BY total_orders;
+ 
+ 
 
 
 
