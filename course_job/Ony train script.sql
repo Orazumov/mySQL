@@ -933,6 +933,125 @@ ALTER TABLE train_time
 --     -----------------------------------------------------------------------------------------
 -- ЗАПРОСЫ
      
+     SELECT * FROM train tt ;
      
+     SELECT * FROM platform_way ;
+     SELECT * FROM ways ;
+ 
+     SELECT * FROM stations_line ;
+
+
+    
+    -- раписание с поездами
+    
+     SELECT tr.name, tr_ty.train_type_name, date_time_arrive, stop_time, IF(express_flag = 1, 'Экспресс', 'Не экспресс') AS express,
+     st.station_name, pl.platform_number AS platform, pl_ty.platform_type_name, w.way_name
+    
+     FROM train_time ti 
+      LEFT JOIN train tr
+      ON ti.train_id = tr.id 
+      LEFT JOIN train_type tr_ty
+      ON tr.id = tr_ty.id 
+      LEFT JOIN stations_base st
+      ON ti.station_id = st.id 
+      LEFT JOIN platform_way pl
+      ON ti.platform_way_id = pl.id
+      LEFT JOIN platforms_types pl_ty
+      ON pl.platform_type_id = pl_ty.id 
+      LEFT JOIN ways w
+      ON pl.way_id = w.id 
+     ORDER BY date_time_arrive 
+     ;
+     
+    -- посчитать количество остановок для 5 наибольших временых стоянок поезда во всем расписании для ЖД ветки на Сергиев-Посад
+    
+     SELECT COUNT(DISTINCT st.station_name) AS station_number, stop_time
+    
+     FROM train_time ti 
+     LEFT JOIN stations_base st
+     ON ti.station_id = st.id AND stations_line_id = (SELECT id FROM stations_line sl WHERE line_name = 'Сергиево-Посадская')
+     GROUP BY stop_time
+     ORDER BY stop_time DESC
+     LIMIT 5
+     ;
+    
+    -- посчитать стоимость проезда от Москвы до Сергиева-Посада (от начала до конца ветки) на всех типах мест
+    
+    
+    SELECT pt.place_type_name, pppt.price +  -- price - цена на занятие места определенного типа в вагоне. place_type_name - тип места в вагоне
+    
+    (SELECT (SELECT price_per_km FROM price)*sb.distance AS price_for_ride_rub  -- считаем цену за проезд: умножаем цену за 1 км на количество км.
+    
+    FROM 
+     
+    stations_line_stations_base slsb
+    JOIN stations_base sb
+    ON slsb.station_id = sb.id 
+	 
+    WHERE station_number = (SELECT MAX(station_number) FROM stations_line_stations_base)  -- считаем конечную станцию на ветке
+    
+	AND stations_line_id = (SELECT id FROM stations_line sl WHERE line_name = 'Сергиево-Посадская')) AS price, -- получаем id ветки по ее названию
+    
+    
+    pppt.price_reduced +  -- аналогично, но цена со скидкой
+    
+    (SELECT (SELECT price_per_km FROM price)*sb.distance AS price_for_ride_rub
+    
+    FROM 
+     
+    stations_line_stations_base slsb
+     JOIN stations_base sb
+     ON slsb.station_id = sb.id 
+	 
+    WHERE station_number = (SELECT MAX(station_number) FROM stations_line_stations_base)
+    
+	AND stations_line_id = (SELECT id FROM stations_line sl WHERE line_name = 'Сергиево-Посадская')) AS price_reduced
+    
+    FROM price_per_place_type pppt 
+    JOIN places_types pt
+    ON pppt.place_type_id = pt.id;
+
+	-- рассчитать среднюю скорость движения поездa EL601
+	 
+   SELECT ROUND((
+     
+    SELECT distance FROM stations_base WHERE id = (SELECT MAX(station_number) FROM stations_line_stations_base WHERE 
+      stations_line_id = (SELECT id FROM stations_line sl WHERE line_name = 'Сергиево-Посадская'))
+     
+    ) / (
+    (
+     SELECT TIMESTAMPDIFF(minute, (
+     
+     
+     SELECT date_time_arrive FROM 
+     train_time tt 
+     JOIN train tr
+     ON tt.train_id = tr.id AND tr.name = 'EL601' AND station_id = (
+     
+     SELECT MIN(station_number) FROM stations_line_stations_base WHERE 
+      stations_line_id = (SELECT id FROM stations_line sl WHERE line_name = 'Сергиево-Посадская')
+     
+     )
+     
+     
+     ), 
+     (
+     
+     
+          SELECT date_time_arrive FROM 
+     train_time tt 
+     JOIN train tr
+     ON tt.train_id = tr.id AND tr.name = 'EL601' AND station_id = 
+     
+     (SELECT MAX(station_number) FROM stations_line_stations_base WHERE 
+      stations_line_id = (SELECT id FROM stations_line sl WHERE line_name = 'Сергиево-Посадская'))
+
+     )
+     
+     
+     )
+    ) / 60
+     )) AS km_per_hour;
+    
      
      

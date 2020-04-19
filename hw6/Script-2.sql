@@ -661,6 +661,48 @@ SELECT
 	  
 	 --  
 	 
+	 
+	SELECT   
+  CONCAT(first_name, ' ', last_name) AS user, (DISTINCT (COUNT(l.user_id) + COUNT( med.user_id) + COUNT( mes.from_user_id))) as activity 
+	  FROM users u
+	  LEFT JOIN likes l
+	  	ON l.user_id = u.id
+	  LEFT JOIN media med
+	    ON med.user_id = u.id
+	  LEFT JOIN messages mes
+	    ON mes.from_user_id = u.id
+	  GROUP BY u.id 
+	  ORDER BY activity
+	  LIMIT 10;
+	 
+	 
+	 
+	 
+	 USE vk;
+	 
+SELECT CONCAT(u.first_name," ",u.last_name) AS user, 
+  p.user_id AS posts, 
+    m.from_user_id AS messages, 
+    media.user_id AS media, 
+    l.user_id AS likes,
+    (IFNULL(p.user_id,0) + IFNULL(m.from_user_id,0) + IFNULL(media.user_id,0) + IFNULL(l.user_id,0)) AS user activity 
+  
+    FROM users AS u
+    LEFT JOIN posts AS p
+    ON p.user_id = u.id
+    LEFT JOIN messages AS m
+    ON m.from_user_id = u.id
+    LEFT JOIN media AS media
+    ON media.user_id = u.id
+    LEFT JOIN likes AS l
+    ON l.user_id = u.id
+    GROUP BY u.id
+    ORDER BY user activity ASC
+    limit 100;
+    
+    --
+	 
+	 
 	  SELECT * from likes ;
 
 	  SELECT * from media ;
@@ -1231,4 +1273,42 @@ SELECT CONCAT(first_name, ' ', last_name) AS fullname
   WHERE last_name RLIKE '^S.*t$';
   
   
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ USE shop;
+
+
+CREATE VIEW names AS
+SELECT products.name AS product_name, catalogs.name AS catalog_name 
+FROM products
+JOIN catalogs
+ON catalogs.id = products.catalog_id ;
+
+SELECT * FROM names;
+
+SELECT * from catalogs c2 ;
   
+1	Процессоры
+2	Мат. платы
+3	Видеокарты
+4	Письменные принадлежности
+5	Учебники
+6	Бытовая техника
+25	Письменные принадлежности
+260	Учебники
+555	Бытовая техника
+
+SELECT * from products p2 ;
