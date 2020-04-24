@@ -933,15 +933,7 @@ ALTER TABLE train_time
 --     -----------------------------------------------------------------------------------------
 -- ЗАПРОСЫ
      
-     SELECT * FROM train tt ;
-     
-     SELECT * FROM platform_way ;
-     SELECT * FROM ways ;
- 
-     SELECT * FROM stations_line ;
-
-
-    
+   
     -- раписание с поездами
     
      SELECT tr.name, tr_ty.train_type_name, date_time_arrive, stop_time, IF(express_flag = 1, 'Экспресс', 'Не экспресс') AS express,
@@ -965,7 +957,7 @@ ALTER TABLE train_time
      
     -- посчитать количество остановок для 5 наибольших временых стоянок поезда во всем расписании для ЖД ветки на Сергиев-Посад
     
-     SELECT COUNT(DISTINCT st.station_name) AS station_number, stop_time
+     SELECT COUNT(DISTINCT st.station_name) AS stops_number, stop_time, ANY_VALUE(st.station_name) AS station_name_example
     
      FROM train_time ti 
      LEFT JOIN stations_base st
@@ -1054,4 +1046,99 @@ ALTER TABLE train_time
      )) AS km_per_hour;
     
      
-     
+-- вывести поезда по среднему рейтингу в отзывах и по количеству вагонов в составе.
+
+   SELECT   
+   tr.name, ANY_VALUE(tt.train_type_name) AS train_type, COUNT(tc.car_num) AS car_num,
+   AVG(fd.rate) AS average_rate
+   FROM 
+   feedback fd
+   JOIN train tr
+   ON fd.train_id = tr.id
+   JOIN train_car tc 
+   ON tc.train_id = tr.id
+   JOIN train_type tt
+   ON tt.id = tr.type_id 
+   GROUP BY tr.name 
+   ORDER BY average_rate DESC, car_num
+   ;
+   
+  
+  -- представление с названиями поездов, а также теми, кто оставил отзывы, их отзывами и рейтингом:
+  
+  CREATE VIEW feedbacks AS SELECT tr.name, (JSON_EXTRACT(feedback, '$.who')) AS who, rate,
+  (JSON_EXTRACT(feedback, '$.text')) AS feed_text
+    FROM 
+  feedback fd
+  JOIN train tr
+   ON fd.train_id = tr.id
+  ORDER BY rate
+  ;
+  
+ -- в представлении найдем поезда с самым низким рейтингом, явно меньше 5ти:
+ 
+ SELECT name, AVG(rate) AS avg_rate
+  FROM 
+   feedbacks 
+ GROUP BY name
+ HAVING AVG(rate) < 5 
+ ORDER BY avg_rate ASC
+  ;
+
+ -- представление поездов с вагонами и местами в них:
+ 
+ CREATE VIEW train_full AS
+SELECT tr.name, tc.car_num, c.car_name, place_num, pt.place_type_name FROM 
+train tr
+JOIN train_car tc
+ON tr.id = tc.train_id 
+JOIN car c
+ON c.id = tc.car_id 
+JOIN car_place cp
+ON cp.car_id = c.id 
+JOIN places_types pt
+ON pt.id = cp.place_type_id ;
+ 
+-- посмотрим в каких поездах есть мягкие купе:
+
+SELECT DISTINCT name FROM train_full 
+WHERE place_type_name = 'Мягкое купе'
+;
+
+-- создадим представление, где будет расписание и поезда + места + вагоны + цены:
+
+CREATE VIEW schedule_train_car_place_price AS 
+SELECT DISTINCT ti.stations_line_id, ti.express_flag, ti.date_time_arrive, ti.stop_time, ti.station_id, 
+tr.name, tc.car_num, c.car_name, cp.place_num, pt.place_type_name, pri.price  FROM 
+train_time ti 
+      LEFT JOIN train tr
+      ON ti.train_id = tr.id 
+      LEFT JOIN train_car tc
+	  ON tr.id = tc.train_id 
+	  LEFT JOIN car c
+	  ON c.id = tc.car_id 
+	  LEFT JOIN car_place cp
+	  ON cp.car_id = c.id 
+	  LEFT JOIN places_types pt
+      ON pt.id = cp.place_type_id
+      LEFT JOIN price_per_place_type pri
+      ON pri.place_type_id = pt.id ;
+
+
+-- посмотрим самый дешевый поезд, который останавливается на станции Софрино:
+
+ 
+SELECT name, ROUND(AVG(price)) AS av_pr
+
+FROM 
+
+schedule_train_car_place_price vw
+JOIN stations_base sb
+ON vw.station_id = sb.id 
+WHERE vw.station_id = 21  -- Софрино
+GROUP BY vw.name
+ORDER BY av_pr
+LIMIT 1
+;
+
+

@@ -1,0 +1,68 @@
+## 1. Проанализировать какие запросы могут выполняться наиболее часто в процессе работы приложения и добавить необходимые индексы.
+
+
+## предположительно это будут частые запросы от пользователей: 
+
+CREATE INDEX first_name_last_name_users_idx ON users (first_name, last_name);
+-- поиск юзеров по имени и фамилии.
+
+CREATE UNIQUE INDEX email_users_idx ON users(email);
+
+CREATE UNIQUE INDEX phone_users_idx ON users(phone);
+
+-- поиск юзеров по телефону или email
+
+## автоматический поиск:
+
+CREATE INDEX birthday_profiles_idx ON profiles(birthday);
+
+-- поиск для уведомлений о днях рождения
+
+CREATE INDEX media_user_id_media_type_id_created_at_idx ON media(user_id, media_type_id, created_at);
+
+-- чтобы выводить категории медиа по дате для показа пользователю (c определенным user_id).
+
+CREATE INDEX from_user_id_created_at_messages_idx ON messages(from_user_id, created_at);
+
+CREATE INDEX to_user_id_created_at_messages_idx ON messages(to_user_id, created_at);
+
+-- поиск сообщений по отправителю и получателюупорядоченный по дате для вывода.
+
+CREATE INDEX comminuty_id_created_at_posts_idx ON posts(comminuty_id, created_at);
+
+CREATE INDEX user_id_created_at_posts_idx ON posts(user_id, created_at);
+
+-- поиск постов при открытии сообщества, упорядоченные по дате.
+-- поиск постов определенного пользователя, упорядоченные по дате.
+
+
+## 2. Задание на оконные функции.
+#Провести аналитику в разрезе групп.
+#Построить запрос, который будет выводить следующие столбцы:
+#!!!! имя группы
+# --- среднее количество пользователей в группах
+#самый молодой пользователь в группе
+#самый пожилой пользователь в группе
+# !!!! количество пользователей в группе
+# !!!! всего пользователей в системе
+# !!!! отношение в процентах (количество пользователей в группе / всего пользователей в системе) * 100
+
+
+SELECT DISTINCT co.name,
+   (SELECT COUNT(id) FROM users) AS total_users,
+   COUNT(cu.user_id) OVER w AS number_of_users_in_community,
+   COUNT(cu.user_id) OVER() / (SELECT COUNT(*) FROM communities c2) AS average_number,
+   COUNT(cu.user_id) OVER w / (SELECT COUNT(id) FROM users) * 100 AS "%%",
+   FIRST_VALUE(pr.user_id) OVER (PARTITION BY cu.community_id ORDER BY pr.birthday DESC) AS youngest_user_id,
+   FIRST_VALUE(pr.user_id) OVER (PARTITION BY cu.community_id ORDER BY pr.birthday ASC)  AS oldest_user_id
+   
+  
+    FROM users u
+      LEFT JOIN profiles pr
+        ON u.id = pr.user_id 
+      LEFT JOIN communities_users cu 
+        ON cu.user_id = pr.user_id 
+      RIGHT JOIN communities co
+        ON co.id = cu.community_id 
+       WINDOW w AS (PARTITION BY cu.community_id)
+       ;
