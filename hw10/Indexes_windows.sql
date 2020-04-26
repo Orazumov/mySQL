@@ -62,11 +62,30 @@ SELECT DISTINCT co.name,
         ON u.id = pr.user_id 
       LEFT JOIN communities_users cu 
         ON cu.user_id = pr.user_id 
-      LEFT JOIN communities co
+      RIGHT JOIN communities co
         ON co.id = cu.community_id 
        WINDOW w AS (PARTITION BY cu.community_id)
        ;
 
+      
+    SELECT DISTINCT co.name,
+   (SELECT COUNT(id) FROM users) AS total_users,
+   COUNT(cu.user_id) OVER w AS number_of_users_in_community,
+   COUNT(cu.user_id) OVER() / (SELECT COUNT(*) FROM communities c2) AS average_number,
+   COUNT(cu.user_id) OVER w / (SELECT COUNT(id) FROM users) * 100 AS "%%",
+   FIRST_VALUE(pr.user_id) OVER (PARTITION BY cu.community_id ORDER BY pr.birthday DESC) AS youngest_user_id,
+   FIRST_VALUE(pr.user_id) OVER (PARTITION BY cu.community_id ORDER BY pr.birthday ASC)  AS oldest_user_id
+   
+  
+    FROM users u
+      LEFT JOIN profiles pr
+        ON u.id = pr.user_id 
+      LEFT JOIN communities_users cu 
+        ON cu.user_id = pr.user_id 
+      LEFT JOIN communities co
+        ON co.id = cu.community_id 
+       WINDOW w AS (PARTITION BY cu.community_id)
+       ;
 
 
 
@@ -165,6 +184,13 @@ SELECT DISTINCT co.name,
       (1, 65),
       (2, 4),
       (3, 5)
+      ;
+     
+       SELECT * FROM communities;    
+
+     
+      INSERT INTO communities (id, name) VALUES
+      (21, 'super')
       ;
      
      DELETE FROM communities_users 

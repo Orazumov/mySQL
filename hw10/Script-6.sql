@@ -626,4 +626,118 @@ SELECT user_id, city, birthday,
 -- Применение JSON
 
 
+-- --------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#Практическое задание по теме “Оптимизация запросов”
+
+     #Создайте таблицу logs типа Archive. Пусть при каждом создании записи в таблицах users, 
+#catalogs и products в таблицу logs помещается время и дата создания записи, название таблицы, 
+#идентификатор первичного ключа и содержимое поля name.
+
+     USE shop;
+    
+    SHOW TABLES;
+   
+  CREATE TABLE logs (
+id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+table_name VARCHAR (20),
+table_id INT UNSIGNED,
+name_field VARCHAR (255),
+event_date_time DATETIME
+) COMMENT = 'Логи операций в таблицах users, catalogs, products' ENGINE = Archive;
+
+DESC logs;
+
+SELECT * FROM users u ;
+
+DELETE FROM users WHERE id = 0;
+
+DESC users;
+
+SELECT MAX(updated_at) FROM users ;
+
+SELECT id FROM users WHERE updated_at = (SELECT updated_at FROM users ORDER BY updated_at DESC LIMIT 1);
+
+DELIMITER //
+
+DROP TRIGGER IF EXISTS insert_users_log //
+
+CREATE TRIGGER insert_users_log AFTER INSERT ON users
+FOR EACH ROW
+BEGIN
+
+	INSERT INTO logs(table_name, table_id, name_field, event_date_time) VALUES
+    ('users', COALESCE (NEW.id, (SELECT id FROM users WHERE updated_at = (SELECT updated_at FROM users ORDER BY updated_at DESC LIMIT 1))), NEW.name, NOW());
+
+END //
+
+SELECT * FROM catalogs;
+
+DELIMITER //
+
+DROP TRIGGER IF EXISTS insert_catalogs_log //
+
+CREATE TRIGGER insert_catalogs_log AFTER INSERT ON catalogs
+FOR EACH ROW
+BEGIN
+
+	INSERT INTO logs(table_name, table_id, name_field, event_date_time) VALUES
+    ('catalogs', NEW.id, NEW.name, NOW());
+
+END //
+
+SELECT * FROM products;
+
+
+DELIMITER //
+
+DROP TRIGGER IF EXISTS insert_products_log //
+
+CREATE TRIGGER insert_products_log AFTER INSERT ON products
+FOR EACH ROW
+BEGIN
+
+	INSERT INTO logs(table_name, table_id, name_field, event_date_time) VALUES
+    ('products', NEW.id, NEW.name, NOW());
+
+END //
+
+INSERT INTO users (id, name, date, birthday, room, created_at, updated_at) VALUES
+ (24, 'Daniel', NOW(), '2020-04-04 17:27:21', 544, NOW(), NOW());
+
+SELECT * FROM logs l ;
+
+     
+#(по желанию) Создайте SQL-запрос, который помещает в таблицу users миллион записей.
+
+SELECT * FROM users ;
+
+DELIMITER //
+
+DROP PROCEDURE IF EXISTS insert_million //
+
+CREATE PROCEDURE insert_million()
+
+BEGIN
+	
+DECLARE i INT DEFAULT 1 ;
+WHILE i =< 10 DO
+
+INSERT INTO users (id, name, date, birthday, room, created_at, updated_at) VALUES
+((25 + i), 'Million_names', NOW(), '2020-04-04 17:27:21', i, NOW(), NOW());
+
+SET i = i + 1 ;
+END WHILE ;	
+
+
+END //
+
+CREATE PROCEDURE 
+
+INSERT INTO users (id, name, date, birthday, room, created_at, updated_at) VALUES
+(25, 'Million_names', NOW(), '2020-04-04 17:27:21', 1, NOW(), NOW()),
+(26, 'Million_names', NOW(), '2020-04-04 17:27:21', 2, NOW(), NOW()),
+(27, 'Million_names', NOW(), '2020-04-04 17:27:21', 3, NOW(), NOW()),
+...
+(124, 'Million_names', NOW(), '2020-04-04 17:27:21', 100, NOW(), NOW())
 

@@ -1,0 +1,147 @@
+     #Создайте таблицу logs типа Archive. Пусть при каждом создании записи в таблицах users, 
+#catalogs и products в таблицу logs помещается время и дата создания записи, название таблицы, 
+#идентификатор первичного ключа и содержимое поля name.
+
+     USE shop;
+    
+    SHOW TABLES;
+   
+  CREATE TABLE logs (
+id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+table_name VARCHAR (20),
+table_id INT UNSIGNED,
+name_field VARCHAR (255),
+event_date_time DATETIME
+) COMMENT = 'Логи операций в таблицах users, catalogs, products' ENGINE = Archive;
+
+DELIMITER //
+
+DROP TRIGGER IF EXISTS insert_users_log //
+
+CREATE TRIGGER insert_users_log AFTER INSERT ON users
+FOR EACH ROW
+BEGIN
+
+	INSERT INTO logs(table_name, table_id, name_field, event_date_time) VALUES
+    ('users', COALESCE (NEW.id, (SELECT id FROM users WHERE updated_at = (SELECT updated_at FROM users ORDER BY updated_at DESC LIMIT 1))), NEW.name, NOW());
+
+END //
+
+SELECT * FROM catalogs;
+
+DELIMITER //
+
+DROP TRIGGER IF EXISTS insert_catalogs_log //
+
+CREATE TRIGGER insert_catalogs_log AFTER INSERT ON catalogs
+FOR EACH ROW
+BEGIN
+
+	INSERT INTO logs(table_name, table_id, name_field, event_date_time) VALUES
+    ('catalogs', NEW.id, NEW.name, NOW());
+
+END //
+
+DELIMITER //
+
+DROP TRIGGER IF EXISTS insert_products_log //
+
+CREATE TRIGGER insert_products_log AFTER INSERT ON products
+FOR EACH ROW
+BEGIN
+
+	INSERT INTO logs(table_name, table_id, name_field, event_date_time) VALUES
+    ('products', NEW.id, NEW.name, NOW());
+
+END //
+
+
+#(по желанию) Создайте SQL-запрос, который помещает в таблицу users миллион записей.
+
+
+DELIMITER //
+
+DROP PROCEDURE IF EXISTS insert_million //
+
+CREATE PROCEDURE insert_million()
+
+BEGIN
+	
+DECLARE i INT DEFAULT 1 ;
+
+WHILE i < 1000000 DO
+
+INSERT INTO users (id, name, date, birthday, room, created_at, updated_at) VALUES
+((25 + i), 'Million_names', NOW(), '2020-04-04 17:27:21', i, NOW(), NOW());
+
+SET i = i + 1 ;
+END WHILE ;	
+
+
+END //
+
+CALL insert_million();
+
+
+В базе данных Redis подберите коллекцию для подсчета посещений с определенных IP-адресов.
+
+oleg@heahber:~$ redis-cli
+127.0.0.1:6379> 
+127.0.0.1:6379> 
+127.0.0.1:6379> MSET 127.0.0.1 0 192.168.2.5 1 8.8.8.8 300
+OK
+127.0.0.1:6379> GET 127.0.0.1
+"0"
+127.0.0.1:6379> GET 8.8.8.8
+"300"
+127.0.0.1:6379> GET 192.168.2.5
+"1"
+127.0.0.1:6379> 
+
+
+При помощи базы данных Redis решите задачу поиска имени пользователя по электронному адресу и наоборот, поиск электронного адреса пользователя по его имени.
+
+
+127.0.0.1:6379> SET oleg oleg@mail.ru
+OK
+127.0.0.1:6379> SET misha misha@mail.ru
+OK
+127.0.0.1:6379> SET petr petr@mail.ru
+OK
+127.0.0.1:6379> SET petr@mail.ru petr
+OK
+127.0.0.1:6379> SET misha@mail.ru misha
+OK
+127.0.0.1:6379> SET oleg@mail.ru oleg
+OK
+127.0.0.1:6379> GET oleg
+"oleg@mail.ru"
+127.0.0.1:6379> GET petr@mail.ru
+"petr"
+127.0.0.1:6379> 
+
+
+Организуйте хранение категорий и товарных позиций учебной базы данных shop в СУБД MongoDB.
+
+> db.version()
+3.6.8
+> db.version
+function () {
+        return this.serverBuildInfo().version;
+    }
+> 
+> 
+> use shop
+switched to db shop
+> db.shop.insert({"name": "Процессор", "description": "Intel CORE i7", "price": 1000, "catalog_id": 25})
+WriteResult({ "nInserted" : 1 })
+> db.shop.insert({"name": "Материнская плата", "description": "ASUS", "price": 1500, "catalog_id": 26})
+WriteResult({ "nInserted" : 1 })
+> db.shop.insert({"name": "Монитор", "description": "SONY", "price": 500, "catalog_id": 27})
+WriteResult({ "nInserted" : 1 })
+> db.shop.find()
+{ "_id" : ObjectId("5ea5da93ccfd7ed0c23fefd7"), "name" : "Процессор", "description" : "Intel CORE i7", "price" : 1000, "catalog_id" : 25 }
+{ "_id" : ObjectId("5ea5daafccfd7ed0c23fefd8"), "name" : "Материнская плата", "description" : "ASUS", "price" : 1500, "catalog_id" : 26 }
+{ "_id" : ObjectId("5ea5daf7ccfd7ed0c23fefd9"), "name" : "Монитор", "description" : "SONY", "price" : 500, "catalog_id" : 27 }
+> 
+

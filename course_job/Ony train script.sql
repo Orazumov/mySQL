@@ -824,8 +824,8 @@ ALTER TABLE train_time
     FOREIGN KEY (platform_way_id) REFERENCES platform_way(id);
    
    
-   ALTER TABLE train_time DROP FOREIGN KEY train_time_station_id_fk;
-     ALTER TABLE train_time DROP FOREIGN KEY tr_train_time_platform_way_id_fk;
+ --  ALTER TABLE train_time DROP FOREIGN KEY train_time_station_id_fk;
+ --    ALTER TABLE train_time DROP FOREIGN KEY tr_train_time_platform_way_id_fk;
 
 
    
@@ -836,8 +836,8 @@ ALTER TABLE train_time
     FOREIGN KEY (stations_line_id) REFERENCES stations_line(id);
 
    
-                                    ALTER TABLE train_time DROP FOREIGN KEY tr_train_time_train_id_fk;
-                                    ALTER TABLE train_time DROP FOREIGN KEY tr_train_stations_line_id_fk;
+               --                     ALTER TABLE train_time DROP FOREIGN KEY tr_train_time_train_id_fk;
+               --                     ALTER TABLE train_time DROP FOREIGN KEY tr_train_stations_line_id_fk;
 
    
    ALTER TABLE platform_way  
@@ -847,14 +847,14 @@ ALTER TABLE train_time
     FOREIGN KEY (way_id) REFERENCES ways(id);
    
    
-                                 ALTER TABLE platform_way DROP FOREIGN KEY platform_way_station_id_fk;
+             --                    ALTER TABLE platform_way DROP FOREIGN KEY platform_way_station_id_fk;
 
    
   ALTER TABLE platform_way
   ADD CONSTRAINT platform_way_platform_type_id_fk 
     FOREIGN KEY (platform_type_id) REFERENCES platforms_types(id);
    
-                              ALTER TABLE platform_way DROP FOREIGN KEY tr_platform_way_platform_type_id_fk;
+            --          ALTER TABLE platform_way DROP FOREIGN KEY tr_platform_way_platform_type_id_fk;
 
    
    
@@ -862,14 +862,14 @@ ALTER TABLE train_time
   ADD CONSTRAINT train_type_id_fk 
     FOREIGN KEY (type_id) REFERENCES train_type(id);
    
-                           ALTER TABLE train DROP FOREIGN KEY train_train_type_id_fk;
+             --              ALTER TABLE train DROP FOREIGN KEY train_train_type_id_fk;
 
 
       ALTER TABLE train 
   ADD CONSTRAINT train_train_feedback_id_fk 
     FOREIGN KEY (feedback_id) REFERENCES feedback(id);
 
-                        ALTER TABLE train DROP FOREIGN KEY tr_train_train_feedback_id_fk;
+            --            ALTER TABLE train DROP FOREIGN KEY tr_train_train_feedback_id_fk;
 
    
    ALTER TABLE train_car 
@@ -878,8 +878,8 @@ ALTER TABLE train_time
   ADD CONSTRAINT train_car_car_id_fk 
     FOREIGN KEY (car_id) REFERENCES car(id);
     
-                     ALTER TABLE train_car DROP FOREIGN KEY tr_train_car_train_id_fk;
-                     ALTER TABLE train_car DROP FOREIGN KEY tr_train_car_car_id_fk;
+          --           ALTER TABLE train_car DROP FOREIGN KEY tr_train_car_train_id_fk;
+          --           ALTER TABLE train_car DROP FOREIGN KEY tr_train_car_car_id_fk;
 
    
    
@@ -888,7 +888,7 @@ ALTER TABLE train_time
     FOREIGN KEY (car_type_id) REFERENCES car_type(id);
    
    
-                  ALTER TABLE car DROP FOREIGN KEY tr_car_car_type_id_fk;
+       --           ALTER TABLE car DROP FOREIGN KEY tr_car_car_type_id_fk;
 
    
    
@@ -899,7 +899,7 @@ ALTER TABLE train_time
     FOREIGN KEY (car_id) REFERENCES car(id);
     
    
-               ALTER TABLE car_place DROP FOREIGN KEY tr_car_place_car_id_fk;
+       --        ALTER TABLE car_place DROP FOREIGN KEY tr_car_place_car_id_fk;
 
    
       ALTER TABLE stations_line_stations_base    -- !!
@@ -908,8 +908,8 @@ ALTER TABLE train_time
   ADD CONSTRAINT stations_line_stations_base_station_id_fk
     FOREIGN KEY (station_id) REFERENCES stations_base (id);
     
-            ALTER TABLE stations_line_stations_base DROP FOREIGN KEY stations_line_stations_base_stations_line_id_fk;
-            ALTER TABLE stations_line_stations_base DROP FOREIGN KEY stations_line_stations_base_station_id_fk;
+      --      ALTER TABLE stations_line_stations_base DROP FOREIGN KEY stations_line_stations_base_stations_line_id_fk;
+     --       ALTER TABLE stations_line_stations_base DROP FOREIGN KEY stations_line_stations_base_station_id_fk;
 
    
    
@@ -918,7 +918,7 @@ ALTER TABLE train_time
     FOREIGN KEY (place_type_id) REFERENCES places_types(id);
 
   
-         ALTER TABLE price_per_place_type DROP FOREIGN KEY tr_price_per_place_type_place_type_id_fk;
+    --     ALTER TABLE price_per_place_type DROP FOREIGN KEY tr_price_per_place_type_place_type_id_fk;
 
    
        ALTER TABLE feedback 
@@ -926,7 +926,7 @@ ALTER TABLE train_time
     FOREIGN KEY (train_id) REFERENCES train(id);
     
    
-      ALTER TABLE feedback DROP FOREIGN KEY tr_feedback_train_id_fk;
+  --    ALTER TABLE feedback DROP FOREIGN KEY tr_feedback_train_id_fk;
      
      
      
@@ -1141,4 +1141,268 @@ ORDER BY av_pr
 LIMIT 1
 ;
 
+-- оконная функция:
 
+-- посчитаем когда все поезда прибывают на конечную станцию:
+
+SELECT * FROM train_time tt ;
+
+SELECT DISTINCT tr.name, 
+  MAX(tt.date_time_arrive) OVER w AS date_time,
+  LAST_VALUE(tt.station_id) OVER w AS last_station_id, 
+  LAST_VALUE(sb.station_name) OVER w AS last_station_name 
+    FROM train_time tt 
+      JOIN train tr
+        ON tt.train_id = tr.id 
+      JOIN stations_base sb
+        ON tt.station_id = sb.id 
+     
+        WINDOW w AS (PARTITION BY tt.train_id);
+       
+-- Триггеры:
+
+-- если в таблицу по ценам за место забудут добавить цены или льготную цену:
+-- возникнет ошибка
+
+DELIMITER //
+
+CREATE TRIGGER price_per_place_type_null_price 
+BEFORE UPDATE ON price_per_place_type 
+FOR EACH ROW 
+BEGIN 
+	
+	IF NEW.price IS NULL 
+	OR NEW.price_reduced is NULL THEN 
+
+	SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Price must be entered!'; 
+	END IF; 
+	
+	END//
+
+	CREATE TRIGGER price_per_place_type_null_price 
+BEFORE INSERT ON price_per_place_type 
+FOR EACH ROW 
+BEGIN 
+	
+	IF NEW.price IS NULL 
+	OR NEW.price_reduced is NULL THEN 
+
+	SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Price must be entered!'; 
+	END IF; 
+	
+	END//
+
+-- если при добавлении в расписание, оператор забудет указать stations_line_id (ЖД ветку), то
+-- подставится последняя.
+
+DELIMITER //
+
+CREATE TRIGGER check_stations_line_id_insert BEFORE INSERT ON train_time
+FOR EACH ROW
+BEGIN
+DECLARE stations_line_id_last INT ;
+SELECT stations_line_id INTO stations_line_id_last FROM train_time ORDER BY id DESC LIMIT 1 ;
+SET NEW.stations_line_id = COALESCE (NEW.stations_line_id, stations_line_id_last);
+END //
+
+-- аналогично при заполнении таблицы stations_line: если оператор забудет указать railway_id - вокзал, будет подставлен последний, 
+-- который использовался.
+
+DELIMITER //
+
+CREATE TRIGGER check_railway_id_insert BEFORE INSERT ON stations_line
+FOR EACH ROW
+BEGIN
+DECLARE railway_id_last INT ;
+SELECT railway_id INTO railway_id_last FROM stations_line ORDER BY id DESC LIMIT 1 ;
+SET NEW.railway_id = COALESCE (NEW.railway_id, railway_id_last);
+END //
+
+-- если при обновлении таблицы с ценой проезда за км. оператор забудет указать новую цену, то
+-- будет использоваться старая:
+
+DELIMITER //
+
+CREATE TRIGGER check_price_per_km_update BEFORE UPDATE ON price
+FOR EACH ROW
+BEGIN
+SET NEW.price_per_km = COALESCE (NEW.price_per_km, OLD.price_per_km);
+END //
+
+-- в таблице цен за км. всегда должно быть значение:
+
+DELIMITER //
+
+CREATE TRIGGER check_last_price BEFORE DELETE ON price
+FOR EACH ROW BEGIN
+DECLARE total INT ;
+SELECT COUNT (*) INTO total FROM price;
+IF total <= 1 THEN
+SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'There must be a value - price_per_km!' ;
+END IF ;
+END //
+
+-- процедура для создания состава поезда с вагонами:
+
+DELIMITER //
+
+DROP PROCEDURE IF EXISTS train//
+
+CREATE PROCEDURE train ( IN train_id INT, car_num INT, car_id INT )
+BEGIN
+
+	DECLARE i INT DEFAULT 1 ;
+
+	IF (train_id > 0) AND (car_num > 0) AND (car_id > 0) THEN
+WHILE i =< car_num DO
+  INSERT INTO tutu.train_car (train_id, car_id, car_num) VALUES
+  (train_id, car_id, i);
+  SET i = i + 1 ;
+END WHILE ;
+  ELSE
+ 	SELECT 'Ошибочное значение параметра.'; 
+ 	END IF ;
+END //
+
+CALL train(5, 5, 1); 
+
+SELECT * FROM train_car tc ;
+
+-- аналогичная процедура для заполнения вагона местами:
+
+DELIMITER //
+
+DROP PROCEDURE IF EXISTS car//
+
+CREATE PROCEDURE car ( IN car_id INT, place_type_id INT, place_num INT)
+BEGIN
+
+	DECLARE i INT DEFAULT 1 ;
+
+	IF (car_id > 0) AND (place_type_id > 0) AND (place_num > 0) THEN
+WHILE i =< place_num DO
+  INSERT INTO tutu.car_place (car_id, place_type_id, place_num) VALUES
+  (car_id, place_type_id, i);
+  SET i = i + 1 ;
+END WHILE ;
+  ELSE
+ 	SELECT 'Ошибочное значение параметра.'; 
+ 	END IF ;
+END //
+
+SELECT * FROM car_place cp ;
+
+SELECT * FROM platform_way pw ;
+
+
+-- функция, которая считает время прибытия поезда на станцию Б и указанную платформу/путь:
+
+SELECT * FROM train_time tt ;
+
+DELIMITER //
+
+CREATE FUNCTION arrive_time(train_id_num INT, station_id_B INT, platform_num INT, way_num INT)
+RETURNS DATETIME READS SQL DATA
+
+  BEGIN
+
+	 RETURN (SELECT date_time_arrive FROM 
+	 train_time tt 
+	 JOIN platform_way pw
+	 ON tt.platform_way_id = pw.id 
+	 WHERE tt.station_id = station_id_B AND tt.train_id = train_id_num AND pw.platform_number = platform_num AND pw.way_id = way_num); 
+    
+  END //
+
+  SELECT arrive_time(1, 6, 1, 1);
+ 
+ -- на каком поезде быстрее доехать от станции А до станции Б:
+  
+ DROP FUNCTION IF EXISTS fastest_train ;
+
+ DELIMITER //
+
+CREATE FUNCTION fastest_train(date_time_arrive_A DATETIME, station_id_A INT, station_id_B INT)
+RETURNS VARCHAR(50) READS SQL DATA
+
+  BEGIN
+
+	 RETURN (
+	 
+	 SELECT train_id FROM 
+	 train_time tt 
+	 WHERE tt.stations_line_id IN (SELECT stations_line_id FROM stations_line_stations_base WHERE station_id = station_id_A) 
+	 AND tt.station_id = station_id_B AND tt.date_time_arrive > date_time_arrive_A
+	 ORDER BY date_time_arrive ASC LIMIT 1
+	
+	 ); 
+    
+  END //
+  
+SELECT fastest_train('2011-02-12 09:47:00', 5, 28);
+
+-- процедура с курсором:
+
+-- выберем из расписания только расписание определенного поезда:
+
+-- создадим результирующую таблицу.
+
+DELIMITER //
+
+DROP TABLE IF EXISTS train_time_one_train //
+
+-- DESC train_time ;
+
+CREATE TABLE train_time_one_train (
+id SERIAL PRIMARY KEY, 
+stations_line_id INT UNSIGNED,
+train_id INT UNSIGNED,
+express_flag BIT(1),
+date_time_arrive DATETIME,
+stop_time TIME,
+station_id INT UNSIGNED,
+platform_way_id INT UNSIGNED
+) //
+
+-- создаем процедуру с курсором.
+
+DELIMITER //
+
+DROP PROCEDURE IF EXISTS copy_schedule //
+CREATE PROCEDURE copy_schedule ()
+BEGIN
+
+	DECLARE is_end INT DEFAULT 0 ;
+	
+	DECLARE id INT UNSIGNED; 
+	DECLARE stations_line_id INT UNSIGNED;
+	DECLARE train_id INT UNSIGNED;
+	DECLARE express_flag BIT(1);
+	DECLARE date_time_arrive DATETIME;
+	DECLARE stop_time TIME;
+	DECLARE station_id INT UNSIGNED;
+	DECLARE platform_way_id INT UNSIGNED;
+
+DECLARE curcat CURSOR FOR SELECT * FROM train_time;
+-- WHERE train_id = 1;
+
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET is_end = 1 ;
+
+OPEN curcat;
+	cycle : LOOP
+	FETCH curcat INTO id, stations_line_id, train_id, express_flag, date_time_arrive, stop_time, station_id, platform_way_id;
+		IF is_end THEN LEAVE cycle;
+		END IF ;
+	INSERT INTO train_time_one_train VALUES ( id, stations_line_id, train_id, express_flag, date_time_arrive, stop_time, station_id, platform_way_id );
+	END LOOP cycle ;
+CLOSE curcat;
+
+END //
+
+CALL copy_schedule();
+
+SELECT * FROM train_time_one_train;
+
+TRUNCATE TABLE  train_time_one_train;
+
+SHOW CREATE PROCEDURE copy_schedule;
